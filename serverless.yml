@@ -33,6 +33,13 @@ functions:
           path: /save-users
           method: post
           cors: true
+  playlist:
+    handler: index.handler
+    events:
+      - http: 
+          path: /user/playlist
+          method: post
+          cors: true
 
 resources:
   Resources:

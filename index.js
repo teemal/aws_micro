@@ -60,4 +60,8 @@ app.post('/save-users', async function (req, res) {
 
 })
 
+app.post('/user/playlist', async function (req, res) {
+  res.send('huzzah')
+})
+
 module.exports.handler = serverless(app);

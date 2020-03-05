@@ -22,8 +22,17 @@ functions:
   app:
     handler: index.handler
     events:
-      - http: ANY /
-      - http: 'ANY {proxy+}'
+      - http: 
+          path: /
+          method: any
+          cors: true
+  createUser:
+    handler: index.handler
+    events:
+      - http: 
+          path: /save-user
+          method: post
+          cors: true
 
 resources:
   Resources:

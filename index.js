@@ -8,74 +8,63 @@ app.use(bodyParser.json({ strict: false }));
 app.use(cors());
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-async function putDDB(id, name, email) {
-  return new Promise((resolve, reject) => {
-    // console.log(typeof id)
-    var params = {
-      ReturnConsumedCapacity: "TOTAL",
-      TableName: "SLSusers",
-      Item: {
-        "pk": name,
-        "sk": id,
-        "email": email
-      }
-    };
-
-    dynamodb.put(params, function (err, data) {
-      if (err) console.log(err);
-      else {
-        console.log(data);
-      }
-    })
-  })
-}
-
-async function scan(scanKey) {
-  return new Promise((resolve, reject) => {
-    var res = []
-    var params = {
+function scan (){
+  return new Promise((resolve, reject)=>{
+    var results = [];
+    var params2ElectricBoogaloo = {
       TableName: "music",
       FilterExpression: "pk = :scanValue",
       ExpressionAttributeValues: {
-        ":scanValue": scanKey
+        ":scanValue": 'genre'
       }
     };
 
-    dynamodb.scan(params, function (err, data) {
+    dynamoDb.scan(params2ElectricBoogaloo, function (err, data) {
       if (err) console.log(err, err.stack);
       else {
         console.log(data);
         data.Items.forEach((i) => {
           console.log(i.sk);
-          res.push(i.sk);
+          results.push(i.sk);
         })
-        console.log(res);
       }
       resolve(res);
+      // return res;
     })
   })
 }
+
+// async function putDDB(id, name, email) {
+//   return new Promise((resolve, reject) => {
+//     // console.log(typeof id)
+//     var params = {
+//       ReturnConsumedCapacity: "TOTAL",
+//       TableName: "SLSusers",
+//       Item: {
+//         "pk": name,
+//         "sk": id,
+//         "email": email
+//       }
+//     };
+
+//     dynamodb.put(params, function (err, data) {
+//       if (err) console.log(err);
+//       else {
+//         console.log(data);
+//       }
+//     })
+//   })
+// }
+
 
 app.get('/', function (req, res) {
   res.send('Hello World!')
 })
 
-// app.post('/save-user', async (req, res) => {
-//   // console.log('fuck')
-//   var id = req.query.id;
-//   var name = req.query.name;
-//   var email = req.query.email;
-//   putDDB(id, name, email)
-//     .catch(e => {
-//       res.status(400).json('booty');
-//     });
-//   var gen = await scan("genre")
-//   res.status(200).json(gen);
-// })
 
 // Create User endpoint
 const USERS_TABLE = "SLSusers"
-app.post('/save-users', function (req, res) {
+app.post('/save-users', async function (req, res) {
   // const { userId, name, email } = req.body;
 
   var userId = req.query.id;
@@ -86,23 +75,43 @@ app.post('/save-users', function (req, res) {
   } else if (typeof name !== 'string') {
     res.status(400).json({ error: '"name" must be a string' });
   }
-
   const params = {
     TableName: USERS_TABLE,
     Item: {
       pk: name,
       sk: userId,
       email: email
-    },
+    }
   };
-
   dynamoDb.put(params, (error) => {
     if (error) {
       console.log(error);
       res.status(400).json({ error: 'Could not create user' });
     }
-    res.json({ userId, name, email });
   });
+  // var gen = scan();
+  // // res.status(200).send(gen);
+  // res.status(200).send("folk,funk");
+
+    var params2ElectricBoogaloo = {
+      TableName: "music",
+      FilterExpression: "pk = :scanValue",
+      ExpressionAttributeValues: {
+        ":scanValue": 'genre'
+      }
+    };
+    var results = [];
+    var gen = dynamoDb.scan(params2ElectricBoogaloo).promise();
+    gen.then((data)=>{
+      data.Items.forEach((i) => {
+        console.log(i.sk);
+        results.push(i.sk);
+      })
+      res.status(200).send(results);
+    }).catch((e)=>{
+      res.send(e)
+    });
+
 })
 
 module.exports.handler = serverless(app);

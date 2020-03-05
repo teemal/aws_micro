@@ -75,8 +75,8 @@ app.get('/', function (req, res) {
 
 // Create User endpoint
 const USERS_TABLE = "SLSusers"
-app.post('/users', function (req, res) {
-  const { userId, name } = req.body;
+app.post('/save-users', function (req, res) {
+  const { userId, name, email } = req.body;
   if (typeof userId !== 'string') {
     res.status(400).json({ error: '"userId" must be a string' });
   } else if (typeof name !== 'string') {
@@ -86,8 +86,9 @@ app.post('/users', function (req, res) {
   const params = {
     TableName: USERS_TABLE,
     Item: {
-      pk: userId,
-      sk: name,
+      pk: name,
+      sk: userId,
+      email: email
     },
   };
 
@@ -96,7 +97,7 @@ app.post('/users', function (req, res) {
       console.log(error);
       res.status(400).json({ error: 'Could not create user' });
     }
-    res.json({ userId, name });
+    res.json({ userId, name, email });
   });
 })
 

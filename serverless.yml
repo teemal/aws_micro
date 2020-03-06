@@ -44,6 +44,10 @@ functions:
           path: /user/playlist
           method: get
           cors: true
+      - http: 
+          path: /user/get/playlists
+          method: get
+          cors: true
 
 resources:
   Resources:

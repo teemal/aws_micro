@@ -104,7 +104,47 @@ app.post('/user/playlist', async function (req, res) {
     })
 })
 
+app.get('/user/get/playlists', async function (req, res) {
+  var params2ElectricBoogaloo = {
+    TableName: "SLSusers",
+    FilterExpression: "pk = :scanValue",
+    ExpressionAttributeValues: {
+      ":scanValue": 'playlistName'
+    }
+  };
+  var results = [];
+  var gen = dynamoDb.scan(params2ElectricBoogaloo).promise();
+  gen.then((data) => {
+    data.Items.forEach((i) => {
+      console.log(i.sk);
+      results.push(i.sk);
+    })
+    res.status(200).send(results);
+  }).catch((e) => {
+    res.send(e)
+  });
+})
+
 app.get('/user/playlist', async function (req, res) {
+  var playlistName = req.query.id;
+  var params2ElectricBoogaloo = {
+    TableName: "SLSusers",
+    FilterExpression: "pk = :scanValue",
+    ExpressionAttributeValues: {
+      ":scanValue": playlistName
+    }
+  };
+  var results = [];
+  var gen = dynamoDb.scan(params2ElectricBoogaloo).promise();
+  gen.then((data) => {
+    data.Items.forEach((i) => {
+      console.log(i.sk);
+      results.push(i.sk);
+    })
+    res.status(200).send(results);
+  }).catch((e) => {
+    res.send(e)
+  });
 })
 
 module.exports.handler = serverless(app);

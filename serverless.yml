@@ -40,6 +40,10 @@ functions:
           path: /user/playlist
           method: post
           cors: true
+      - http: 
+          path: /user/playlist
+          method: get
+          cors: true
 
 resources:
   Resources:

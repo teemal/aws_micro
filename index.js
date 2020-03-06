@@ -104,4 +104,7 @@ app.post('/user/playlist', async function (req, res) {
     })
 })
 
+app.get('/user/playlist', async function (req, res) {
+})
+
 module.exports.handler = serverless(app);

@@ -4,7 +4,9 @@ const express = require('express')
 const app = express()
 const cors = require('cors');
 var AWS = require("aws-sdk");
-app.use(bodyParser.json({ strict: false }));
+app.use(bodyParser.json({
+  strict: false
+}));
 app.use(cors());
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
@@ -20,9 +22,13 @@ app.post('/save-users', async function (req, res) {
   var name = req.query.name;
   var email = req.query.email;
   if (typeof userId !== 'string') {
-    res.status(400).json({ error: '"userId" must be a string' });
+    res.status(400).json({
+      error: '"userId" must be a string'
+    });
   } else if (typeof name !== 'string') {
-    res.status(400).json({ error: '"name" must be a string' });
+    res.status(400).json({
+      error: '"name" must be a string'
+    });
   }
   const params = {
     TableName: USERS_TABLE,
@@ -35,33 +41,67 @@ app.post('/save-users', async function (req, res) {
   dynamoDb.put(params, (error) => {
     if (error) {
       console.log(error);
-      res.status(400).json({ error: 'Could not create user' });
+      res.status(400).json({
+        error: 'Could not create user'
+      });
     }
   });
 
-    var params2ElectricBoogaloo = {
-      TableName: "music",
-      FilterExpression: "pk = :scanValue",
-      ExpressionAttributeValues: {
-        ":scanValue": 'genre'
-      }
-    };
-    var results = [];
-    var gen = dynamoDb.scan(params2ElectricBoogaloo).promise();
-    gen.then((data)=>{
-      data.Items.forEach((i) => {
-        console.log(i.sk);
-        results.push(i.sk);
-      })
-      res.status(200).send(results);
-    }).catch((e)=>{
-      res.send(e)
-    });
+  var params2ElectricBoogaloo = {
+    TableName: "music",
+    FilterExpression: "pk = :scanValue",
+    ExpressionAttributeValues: {
+      ":scanValue": 'genre'
+    }
+  };
+  var results = [];
+  var gen = dynamoDb.scan(params2ElectricBoogaloo).promise();
+  gen.then((data) => {
+    data.Items.forEach((i) => {
+      console.log(i.sk);
+      results.push(i.sk);
+    })
+    res.status(200).send(results);
+  }).catch((e) => {
+    res.send(e)
+  });
 
 })
 
 app.post('/user/playlist', async function (req, res) {
-  res.send('huzzah')
+  var playlist = req.query.playlist;
+  var song = req.query.song;
+  const params = {
+    TableName: USERS_TABLE,
+    Item: {
+      pk: "playlistName",
+      sk: playlist
+    }
+  };
+  var gen = dynamoDb.put(params).promise();
+  gen
+    .then((result) => {
+      var playlist = req.query.playlist;
+      var song = req.query.song;
+      const params = {
+        TableName: USERS_TABLE,
+        Item: {
+          pk: playlist,
+          sk: song
+        }
+      };
+      var gen = dynamoDb.put(params).promise();
+      gen
+        .then((result) => {
+          res.status(200).send(result);
+        })
+        .catch((e) => {
+          res.status(400).send(e);
+        })
+    })
+    .catch((e) => {
+      res.status(400).send(e);
+    })
 })
 
 module.exports.handler = serverless(app);

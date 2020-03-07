@@ -48,6 +48,18 @@ functions:
           path: /user/get/playlists
           method: get
           cors: true
+  playCount:
+    handler: index.handler
+    events:
+      - http: 
+          path: /play
+          method: post
+          cors: true
+  SQSSubscriber:
+    handler: subscriber.handler
+    events:
+      - sqs:
+          arn: arn:aws:sqs:us-east-1:921245065062:reporting.fifo
 
 resources:
   Resources:

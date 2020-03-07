@@ -4,11 +4,17 @@ const express = require('express')
 const app = express()
 const cors = require('cors');
 var AWS = require("aws-sdk");
+AWS.config.update({
+  region: "us-east-1"
+});
+var sqs = new AWS.SQS();
+const QUEUE_URL = "https://sqs.us-east-1.amazonaws.com/921245065062/reporting.fifo";
+const dynamoDb = new AWS.DynamoDB.DocumentClient();
 app.use(bodyParser.json({
   strict: false
 }));
 app.use(cors());
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+
 
 app.get('/', function (req, res) {
   res.send('Hello World!')
@@ -146,5 +152,40 @@ app.get('/user/playlist', async function (req, res) {
     res.send(e)
   });
 })
+
+app.post('/play', async function (req, res) {
+  var params = {
+    MessageAttributes: {
+      "Artist": {
+        DataType: "String",
+        StringValue: req.query.artist
+      },
+      "Album": {
+        DataType: "String",
+        StringValue: req.query.album
+      },
+      "Song": {
+        DataType: "String",
+        StringValue: req.query.song
+      }
+    },
+    MessageBody: "Song: " + req.query.song + " played info",
+    MessageDeduplicationId: Date.now() + "", // Required for FIFO queues
+    MessageGroupId: "SomeGroup", // Required for FIFO queues
+    QueueUrl: QUEUE_URL
+  };
+
+  sqs.sendMessage(params, function (err, data) {
+    if (err) {
+      console.log("Error", err);
+      res.status(500).send(err)
+    } else {
+      console.log("Success", data.MessageId);
+      res.status(200).send('ayyyyy ' + data)
+    }
+  });
+})
+
+
 
 module.exports.handler = serverless(app);

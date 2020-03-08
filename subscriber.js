@@ -6,6 +6,8 @@ exports.handler = (event, context, callback) => {
             input: event,
         }),
     };
-    console.info("event:", JSON.stringify(event));
+    console.log("event:", JSON.stringify(event));
+    var body = event.Records[0].body;
+    console.log('body: ' + JSON.parse(body).text);
     callback(null, response);
 };

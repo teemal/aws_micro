@@ -55,7 +55,7 @@ functions:
           path: /play
           method: post
           cors: true
-  SQSSubscriber:
+  Subscriber:
     handler: subscriber.handler
     events:
       - sqs:
